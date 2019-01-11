@@ -1,4 +1,4 @@
-# rollup-starter-lib
+# Noisadelic
 
 Forked from <a href="https://github.com/rollup/rollup-starter-lib">https://github.com/rollup/rollup-starter-lib</a>
 

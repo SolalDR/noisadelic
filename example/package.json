@@ -1,0 +1,15 @@
+{
+  "name": "rollum-starter-lib-example",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel ./index.html",
+    "watch": "parcel watch ./index.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.16.0"
+  }
+}

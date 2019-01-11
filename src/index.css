@@ -3,7 +3,7 @@ body {
     margin: 0;
 }
 
-#test {
+canvas {
     max-width: 600px;
     max-height: 600px;
     position: absolute;
@@ -14,14 +14,14 @@ body {
 }
 
 @media screen and (orientation: portrait) {
-    #test {
+    canvas {
         height: 80vw;
         width: 80vw;
     }
 }
 
 @media screen and (orientation: landscape) {
-    #test {
+    canvas {
         height: 80vh;
         width: 80vh;
     }

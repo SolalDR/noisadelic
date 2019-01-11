@@ -1,9 +1,9 @@
-import vertexShader from "./../shaders/brownian/vertex.glsl";
-import fragmentShader from "./../shaders/brownian/fragment.glsl";
+import vertexShader from "./../shaders/fractal/vertex.glsl";
+import fragmentShader from "./../shaders/fractal/fragment.glsl";
 import Context from "./Context";
 
 /**
- * @class A Brownian noise generator
+ * @class A Fractal noise generator
  * @param {int} size The size of your texture
  * @param {float} density Increase the amount of detail
  * @param {float} exposition Between 0 & 1 
@@ -12,7 +12,7 @@ import Context from "./Context";
  * @param {[float, float]} offset The offset start of the noise, usefull to create animated noise (default is null, offset will be generated randomly)
  * @todo Use ConWebGLRenderingContexttext.texImage2D()
  */
-class Brownian {
+class Fractal {
 
     /**
      * @constructor
@@ -24,7 +24,8 @@ class Brownian {
         rgb = false,
         exposition = 0.5, 
         dynamic = false,
-        offset = null
+        offset = null,
+        depth = 0
     } = {}){
 
         this.context = new Context();
@@ -42,6 +43,7 @@ class Brownian {
             density: this.context.gl.getUniformLocation(this.program, "u_density"),
             offset: this.context.gl.getUniformLocation(this.program, "u_offset"),
             exposition: this.context.gl.getUniformLocation(this.program, "u_exposition"),
+            depth: this.context.gl.getUniformLocation(this.program, "u_depth"),
             RGB: this.context.gl.getUniformLocation(this.program, "RGB")
         }
         
@@ -51,6 +53,7 @@ class Brownian {
         this.rgb = rgb;
         this.dynamic = dynamic;
         this.offset = offset;
+        this.depth = depth;
         
         this.draw();
     }
@@ -61,7 +64,7 @@ class Brownian {
      */
     draw(){
         if(!this.context) {
-            console.error("Brownian: Trying to draw on a static noise, create a Brownian with dynamic equal true");
+            console.error("Fractal: Trying to draw on a static noise, create a Fractal with dynamic equal true");
             return;
         }
         
@@ -95,6 +98,7 @@ class Brownian {
         gl.uniform1f(this.uniforms.resolution, this.size);
         gl.uniform1f(this.uniforms.density, this.density * 10);
         gl.uniform1f(this.uniforms.exposition, this.exposition);
+        gl.uniform1f(this.uniforms.depth, this.depth);
         gl.uniform2f(this.uniforms.offset, offset[0], offset[1]);
         
         gl.uniform1f(this.uniforms.RGB, this.rgb === true ? 1 : 0);
@@ -128,9 +132,9 @@ class Brownian {
      * @param {float} y 
      */
     at(x, y){
-        console.warn("Brownian: Depreciated method Brownian.at(x, y), need to be improved");
+        console.warn("Fractal: Depreciated method Fractal.at(x, y), need to be improved");
         if (this.context) { 
-            console.error("Brownian: Object need to be dynamic to use this method");
+            console.error("Fractal: Object need to be dynamic to use this method");
             return; 
         }
         var gl = this.context.gl;
@@ -138,6 +142,6 @@ class Brownian {
     }
 }
 
-Brownian.RGB = 1;
+Fractal.RGB = 1;
 
-export default Brownian;
+export default Fractal;

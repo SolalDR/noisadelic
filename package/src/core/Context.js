@@ -1,7 +1,6 @@
 class Context {
   constructor(){
     this.canvas = document.createElement("canvas");
-    document.body.appendChild(this.canvas);
     this.gl = this.canvas.getContext("webgl");
     if (!this.gl) {
       throw new Error("WebGL n'est pas disponible")
@@ -58,4 +57,4 @@ class Context {
   }
 }
 
-export default new Context();
+export default Context;

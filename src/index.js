@@ -5,7 +5,7 @@ console.time();
 var noise = new Fractal({
     size: 1024,
     rgb: true,
-    density: 1,
+    density: 10,
     exposition: 0.8,
     dynamic: true,
     offset: [0, 0]

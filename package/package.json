@@ -1,6 +1,14 @@
 {
   "name": "noisadelic",
   "version": "0.0.1",
+  "author": {
+    "name" : "SolalDR", 
+    "url" : "http://solaldussout-revel.fr"
+  },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/SolalDR/noisadelic.git"
+  },
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "browser": "dist/index.umd.js",

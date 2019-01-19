@@ -1,9 +1,9 @@
-import vertexShader from "./../shaders/fractal/vertex.glsl";
-import fragmentShader from "./../shaders/fractal/fragment.glsl";
+import vertexShader from "./../shaders/noise/vertex.glsl";
+import fragmentShader from "./../shaders/noise/fragment.glsl";
 import Context from "./Context";
 
 /**
- * @class A Fractal noise generator
+ * @class A Noise noise generator
  * @param {int} size The size of your texture
  * @param {float} density Increase the amount of detail
  * @param {float} exposition Between 0 & 1 
@@ -12,7 +12,7 @@ import Context from "./Context";
  * @param {[float, float]} offset The offset start of the noise, usefull to create animated noise (default is null, offset will be generated randomly)
  * @todo Use ConWebGLRenderingContexttext.texImage2D()
  */
-class Fractal {
+class Noise {
 
     /**
      * @constructor
@@ -25,11 +25,18 @@ class Fractal {
         exposition = 0.5, 
         dynamic = false,
         offset = null,
-        depth = 0
+        complexity = 5,
+        stepExposition = 0.5
     } = {}){
 
         this.context = new Context();
         this.canvas = this.context.canvas;
+
+        this.defines = {
+            RGB: false,
+            NORMALIZE: false,
+            SPHERICAL: false
+        }
 
         this.program = this.context.createProgram(vertexShader, fragmentShader);
         
@@ -43,7 +50,8 @@ class Fractal {
             density: this.context.gl.getUniformLocation(this.program, "u_density"),
             offset: this.context.gl.getUniformLocation(this.program, "u_offset"),
             exposition: this.context.gl.getUniformLocation(this.program, "u_exposition"),
-            depth: this.context.gl.getUniformLocation(this.program, "u_depth"),
+            complexity: this.context.gl.getUniformLocation(this.program, "u_complexity"),
+            stepExposition: this.context.gl.getUniformLocation(this.program, "u_step_exposition"),
             RGB: this.context.gl.getUniformLocation(this.program, "RGB")
         }
         
@@ -53,8 +61,9 @@ class Fractal {
         this.rgb = rgb;
         this.dynamic = dynamic;
         this.offset = offset;
-        this.depth = depth;
-        
+        this.complexity = complexity;
+        this.stepExposition = stepExposition;
+
         this.draw();
     }
     
@@ -64,7 +73,7 @@ class Fractal {
      */
     draw(){
         if(!this.context) {
-            console.error("Fractal: Trying to draw on a static noise, create a Fractal with dynamic equal true");
+            console.error("Noise: Trying to draw on a static noise, create a Noise with dynamic equal true");
             return;
         }
         
@@ -95,13 +104,15 @@ class Fractal {
         gl.vertexAttribPointer( this.attributes.uv, 2,gl.FLOAT, false, 0, 0);
         
         // Uniforms
+        gl.uniform1f(this.uniforms.complexity, this.complexity);
         gl.uniform1f(this.uniforms.resolution, this.size);
         gl.uniform1f(this.uniforms.density, this.density * 10);
         gl.uniform1f(this.uniforms.exposition, this.exposition);
-        gl.uniform1f(this.uniforms.depth, this.depth);
-        gl.uniform2f(this.uniforms.offset, offset[0], offset[1]);
+        gl.uniform1f(this.uniforms.stepExposition, this.stepExposition);
+        gl.uniform3f(this.uniforms.offset, offset[0], offset[1], offset[2]);
         
         gl.uniform1f(this.uniforms.RGB, this.rgb === true ? 1 : 0);
+
         
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     
@@ -109,13 +120,13 @@ class Fractal {
         if(!this.dynamic) {
             gl.deleteBuffer(this.context.uvBuffer);
             gl.deleteBuffer(this.context.positionBuffer);
-            this.context = null;
+            this.save();
         }
-
+        
         return this.canvas;
     }
 
-   /**
+    /**
      * Convert the canvas to an image element, if noise is static 
      * @returns {Image}
      */
@@ -167,6 +178,6 @@ class Fractal {
     }
 }
 
-Fractal.RGB = 1;
+Noise.RGB = 1;
 
-export default Fractal;
+export default Noise;

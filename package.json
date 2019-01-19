@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "parcel ./index.html",
-    "watch": "parcel watch ./index.html"
+    "dev": "parcel ./src/index.html",
+    "watch": "parcel watch ./src/index.html"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "sass": "^1.16.0"
+  },
+  "dependencies": {
+    "css": "^2.2.4",
+    "dat.gui": "^0.7.5",
+    "simplex-noise": "^2.4.0"
   }
 }

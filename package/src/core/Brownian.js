@@ -24,7 +24,9 @@ class Brownian {
         rgb = false,
         exposition = 0.5, 
         dynamic = false,
-        offset = null
+        offset = null,
+        complexity = 5,
+        stepExposition = 0.5
     } = {}){
 
         this.context = new Context();
@@ -42,6 +44,8 @@ class Brownian {
             density: this.context.gl.getUniformLocation(this.program, "u_density"),
             offset: this.context.gl.getUniformLocation(this.program, "u_offset"),
             exposition: this.context.gl.getUniformLocation(this.program, "u_exposition"),
+            complexity: this.context.gl.getUniformLocation(this.program, "u_complexity"),
+            stepExposition: this.context.gl.getUniformLocation(this.program, "u_step_exposition"),
             RGB: this.context.gl.getUniformLocation(this.program, "RGB")
         }
         
@@ -51,7 +55,9 @@ class Brownian {
         this.rgb = rgb;
         this.dynamic = dynamic;
         this.offset = offset;
-        
+        this.complexity = complexity;
+        this.stepExposition = stepExposition;
+
         this.draw();
     }
     
@@ -92,12 +98,15 @@ class Brownian {
         gl.vertexAttribPointer( this.attributes.uv, 2,gl.FLOAT, false, 0, 0);
         
         // Uniforms
+        gl.uniform1f(this.uniforms.complexity, this.complexity);
         gl.uniform1f(this.uniforms.resolution, this.size);
         gl.uniform1f(this.uniforms.density, this.density * 10);
         gl.uniform1f(this.uniforms.exposition, this.exposition);
+        gl.uniform1f(this.uniforms.stepExposition, this.stepExposition);
         gl.uniform2f(this.uniforms.offset, offset[0], offset[1]);
         
         gl.uniform1f(this.uniforms.RGB, this.rgb === true ? 1 : 0);
+
         
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     
@@ -105,15 +114,15 @@ class Brownian {
         if(!this.dynamic) {
             gl.deleteBuffer(this.context.uvBuffer);
             gl.deleteBuffer(this.context.positionBuffer);
-            this.context = null;
+            this.save();
         }
-
+        
         return this.canvas;
     }
 
     /**
      * Convert the canvas to an image element, if noise is static 
-     * @returns {Image}
+     * @returns {Image}
      */
     convertImage(){
         var image = new Image();
@@ -121,20 +130,45 @@ class Brownian {
         this.image = image;
         return this.image;
     }
-    
+
+    /**
+     * Save pixel buffer
+     * @param {*} x 
+     * @param {*} y 
+     */
+    save(){
+        var pixels = new Uint8Array(this.size*this.size*4);
+        this.context.gl.readPixels(0, 0, this.size, this.size, this.context.gl.RGBA, this.context.gl.UNSIGNED_BYTE, pixels); 
+        this.buffer = pixels;
+    }
+     
     /**
      * 
      * @param {float} x 
      * @param {float} y 
      */
-    at(x, y){
-        console.warn("Brownian: Depreciated method Brownian.at(x, y), need to be improved");
-        if (this.context) { 
-            console.error("Brownian: Object need to be dynamic to use this method");
-            return; 
-        }
-        var gl = this.context.gl;
-        return gl.readPixels(x, y, 1, 1, gl.RGB_INTEGER, type, pixels); 
+    atRGB(x, y){
+        var rank = (y*this.size + x)*3; 
+        return [
+            this.buffer[rank],
+            this.buffer[rank + 1],
+            this.buffer[rank + 2]
+        ]
+    }
+
+    at(x, y) {
+        // var pX = Math.floor(x);
+        // var pY = Math.floor(y);
+        // var fX = x%(1/this.size);
+        // var fY = x%(1/this.size);
+        return this.buffer[
+            (
+                (
+                    Math.floor( x*512 ) +
+                    Math.floor( y*512 )*this.size 
+                )*4
+            )%this.buffer.length
+        ]
     }
 }
 

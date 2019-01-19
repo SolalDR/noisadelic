@@ -1,9 +1,9 @@
-import vertexShader from "./../shaders/fractal/vertex.glsl";
-import fragmentShader from "./../shaders/fractal/fragment.glsl";
+import vertexShader from "./../shaders/perlin/vertex.glsl";
+import fragmentShader from "./../shaders/perlin/fragment.glsl";
 import Context from "./Context";
 
 /**
- * @class A Fractal noise generator
+ * @class A Perlin noise generator
  * @param {int} size The size of your texture
  * @param {float} density Increase the amount of detail
  * @param {float} exposition Between 0 & 1 
@@ -12,7 +12,7 @@ import Context from "./Context";
  * @param {[float, float]} offset The offset start of the noise, usefull to create animated noise (default is null, offset will be generated randomly)
  * @todo Use ConWebGLRenderingContexttext.texImage2D()
  */
-class Fractal {
+class Perlin {
 
     /**
      * @constructor
@@ -20,12 +20,11 @@ class Fractal {
      */
     constructor({
         size = 512,
-        density = 1,
+        density = 10,
         rgb = false,
         exposition = 0.5, 
         dynamic = false,
-        offset = null,
-        depth = 0
+        offset = null
     } = {}){
 
         this.context = new Context();
@@ -43,7 +42,6 @@ class Fractal {
             density: this.context.gl.getUniformLocation(this.program, "u_density"),
             offset: this.context.gl.getUniformLocation(this.program, "u_offset"),
             exposition: this.context.gl.getUniformLocation(this.program, "u_exposition"),
-            depth: this.context.gl.getUniformLocation(this.program, "u_depth"),
             RGB: this.context.gl.getUniformLocation(this.program, "RGB")
         }
         
@@ -53,8 +51,7 @@ class Fractal {
         this.rgb = rgb;
         this.dynamic = dynamic;
         this.offset = offset;
-        this.depth = depth;
-        
+
         this.draw();
     }
     
@@ -64,7 +61,7 @@ class Fractal {
      */
     draw(){
         if(!this.context) {
-            console.error("Fractal: Trying to draw on a static noise, create a Fractal with dynamic equal true");
+            console.error("Perlin: Trying to draw on a static noise, create a Perlin with dynamic equal true");
             return;
         }
         
@@ -98,13 +95,12 @@ class Fractal {
         gl.uniform1f(this.uniforms.resolution, this.size);
         gl.uniform1f(this.uniforms.density, this.density * 10);
         gl.uniform1f(this.uniforms.exposition, this.exposition);
-        gl.uniform1f(this.uniforms.depth, this.depth);
         gl.uniform2f(this.uniforms.offset, offset[0], offset[1]);
         
         gl.uniform1f(this.uniforms.RGB, this.rgb === true ? 1 : 0);
         
         gl.drawArrays(gl.TRIANGLES, 0, 6);
-    
+
         
         if(!this.dynamic) {
             gl.deleteBuffer(this.context.uvBuffer);
@@ -115,9 +111,9 @@ class Fractal {
         return this.canvas;
     }
 
-   /**
+    /**
      * Convert the canvas to an image element, if noise is static 
-     * @returns {Image}
+     * @returns {Image}
      */
     convertImage(){
         var image = new Image();
@@ -125,48 +121,23 @@ class Fractal {
         this.image = image;
         return this.image;
     }
-
-    /**
-     * Save pixel buffer
-     * @param {*} x 
-     * @param {*} y 
-     */
-    save(){
-        var pixels = new Uint8Array(this.size*this.size*4);
-        this.context.gl.readPixels(0, 0, this.size, this.size, this.context.gl.RGBA, this.context.gl.UNSIGNED_BYTE, pixels); 
-        this.buffer = pixels;
-    }
-     
+    
     /**
      * 
      * @param {float} x 
      * @param {float} y 
      */
-    atRGB(x, y){
-        var rank = (y*this.size + x)*3; 
-        return [
-            this.buffer[rank],
-            this.buffer[rank + 1],
-            this.buffer[rank + 2]
-        ]
-    }
-
-    at(x, y) {
-        // var pX = Math.floor(x);
-        // var pY = Math.floor(y);
-        // var fX = x%(1/this.size);
-        // var fY = x%(1/this.size);
-        return this.buffer[
-            (
-                (
-                    Math.floor( x*512 ) +
-                    Math.floor( y*512 )*this.size 
-                )*4
-            )%this.buffer.length
-        ]
+    at(x, y){
+        console.warn("Perlin: Depreciated method Perlin.at(x, y), need to be improved");
+        if (this.context) { 
+            console.error("Perlin: Object need to be dynamic to use this method");
+            return; 
+        }
+        var gl = this.context.gl;
+        return gl.readPixels(x, y, 1, 1, gl.RGB_INTEGER, type, pixels); 
     }
 }
 
-Fractal.RGB = 1;
+Perlin.RGB = 1;
 
-export default Fractal;
+export default Perlin;

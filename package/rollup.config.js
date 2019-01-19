@@ -2,6 +2,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import pkg from './package.json';
 import glsl from 'rollup-plugin-glsl';
+import glslify from 'rollup-plugin-glslify';
 
 export default [
 	// browser-friendly UMD build
@@ -13,10 +14,8 @@ export default [
 			format: 'umd'
 		},
 		plugins: [
-			glsl({
-				include: '/**/*.glsl',
-	 			exclude: ['**/index.html'],
-				sourceMap: false
+			glslify({
+				baseDir: 'src/shaders'
 			}),
 			resolve(), // so Rollup can find `ms`
 			commonjs()

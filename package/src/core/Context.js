@@ -1,18 +1,30 @@
+/**
+ * @class
+ */
 class Context {
-  constructor(){
-    this.canvas = document.createElement("canvas");
-    this.gl = this.canvas.getContext("webgl");
-    if (!this.gl) {
-      throw new Error("WebGL n'est pas disponible")
-      return;
-    }
-    
+
+  /**
+   * @constructor
+   */
+  constructor () {
+
+    this.canvas = document.createElement('canvas');
+    this.gl = this.canvas.getContext('webgl');
+    if (!this.gl) throw new Error('WebGL n\'est pas disponible');
+
+
     this.createBuffer();
+
   }
-  
-  createBuffer(){
-    var positions = [ -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1 ];
-    var uvs = [ 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1 ];
+
+  /**
+   * Create a plane buffer
+   * @returns {void}
+   */
+  createBuffer () {
+
+    let positions = [ -1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1 ];
+    let uvs = [ 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1 ];
 
     this.positionBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
@@ -20,41 +32,55 @@ class Context {
 
     this.uvBuffer = this.gl.createBuffer();
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(uvs), this.gl.STATIC_DRAW);    
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(uvs), this.gl.STATIC_DRAW);
+
   }
-  
-  createShader(type, source) {
-    var shader = this.gl.createShader(type);
+
+  /**
+   * Create a shader on the webgl context
+   * @param {int} type WebGL constant gl.VERTEX_SHADER || gl.FRAGMENT_SHADER
+   * @param {string} source The source of the shader
+   * @returns {void}
+   */
+  createShader (type, source) {
+
+    let shader = this.gl.createShader(type);
     this.gl.shaderSource(shader, source);
     this.gl.compileShader(shader);
-    var success = this.gl.getShaderParameter(shader,this.gl.COMPILE_STATUS);
-    if (success) {
-      return shader;
-    }
+    let success = this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
+    if (success) return shader;
 
-    var compiled = this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
-    console.error('Shader compiled successfully: ' + compiled);
-    var compilationLog = this.gl.getShaderInfoLog(shader);
-    console.error('Shader compiler log: ' + compilationLog);
+
+    let compiled = this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
+    console.warn(`Shader compiled successfully: ${ compiled }`);
+    let compilationLog = this.gl.getShaderInfoLog(shader);
+    console.warn(`Shader compiler log: ${ compilationLog }`);
 
     this.gl.deleteShader(shader);
-  }
-  
-  
-  createProgram(vertexSource, fragmentSource){
-    var vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexSource);
-    var fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentSource);
 
-    var program = this.gl.createProgram();
+  }
+
+  /**
+   * Create a program on the webgl context
+   * @param {string} vertexSource The source of the vertex shader
+   * @param {string} fragmentSource The source of the fragment shader
+   * @returns {void}
+   */
+  createProgram (vertexSource, fragmentSource) {
+
+    let vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexSource);
+    let fragmentShader = this.createShader(this.gl.FRAGMENT_SHADER, fragmentSource);
+
+    let program = this.gl.createProgram();
     this.gl.attachShader(program, vertexShader);
     this.gl.attachShader(program, fragmentShader);
     this.gl.linkProgram(program);
-    var success = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
-  
-    if (success) {
-      return program;
-    }
+    let success = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
+
+    if (success) return program;
+
   }
+
 }
 
 export default Context;

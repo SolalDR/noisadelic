@@ -26,7 +26,7 @@ float hash(in vec3 p, in float scale) {
 float noise(in vec3 p, in float scale) {
 	vec3 f;
 	p *= scale;
-	f = fract(p);		
+	f = fract(p);
     p = floor(p);
 
 	f = f*f*(3.0 - 2.0*f);
@@ -35,12 +35,12 @@ float noise(in vec3 p, in float scale) {
 	float x100 = hash(p + vec3(1.0, 0.0, 0.0), scale);
 	float x010 = hash(p + vec3(0.0, 1.0, 0.0), scale);
 	float x110 = hash(p + vec3(1.0, 1.0, 0.0), scale);
-	
+
 	float x001 = hash(p + vec3(0.0, 0.0, 1.0), scale);
 	float x101 = hash(p + vec3(1.0, 0.0, 1.0), scale);
 	float x011 = hash(p + vec3(0.0, 1.0, 1.0), scale);
 	float x111 = hash(p + vec3(1.0, 1.0, 1.0), scale);
-	
+
 	float res = mix(
 		mix(
 			mix(x000, x100, f.x),
@@ -63,7 +63,7 @@ float fBm(in vec3 p, in float scale){
 	float f = 0.0;
     p = mod(p, scale);
 	float amp = u_exposition;
-	
+
 	for (float i = 0.; i < 5.; i+=1.)
 	{
 		f += noise(p, scale) * amp;
@@ -79,7 +79,7 @@ void main() {
     vec3 uv = vec3(coord.x, coord.y, 0.);
 	vec3 color;
 	float dentity = u_density;
-    
+
 	#ifdef SPHERICAL
 		uv = (uv - vec3(0.5))*2.;
 		uv = vec3(

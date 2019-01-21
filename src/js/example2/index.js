@@ -74,7 +74,7 @@ class NoiseExample extends Example {
 
         console.log(this.normalMap)
 
-        var geometry = new THREE.SphereGeometry( 1, 64, 64 );
+        var geometry = new THREE.SphereGeometry( 1.5, 64, 64 );
         var material = new THREE.MeshStandardMaterial( { 
             color: new THREE.Color('rgb(255, 177, 0)'),
             normalMap: this.normalMap,

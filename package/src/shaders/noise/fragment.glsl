@@ -1,21 +1,27 @@
-precision highp float;
 #define M_PI 3.14159265358979323846
+#define X_RAND 27.16898
+#define Y_RAND 38.90563
+#define Z_RAND 44.53211512
+#define FACTOR_RAND 5151.5473453
+
+precision highp float;
 
 uniform float u_resolution;
+uniform float u_exposition;
 uniform float u_density;
 uniform vec3 u_offset;
 varying vec2 v_uv;
-uniform bool RGB;
 
+#ifdef NORMALIZE
+	uniform float u_normal_intensity;
+#endif
 
 
 float hash(in vec3 p, in float scale) {
 	// This is tiling part, adjusts with the scale...
 	p = mod(p, scale);
-	return fract(sin(dot(p, vec3(27.16898, 38.90563, 44.53211512))) * 5151.5473453);
+	return fract(sin(dot(p, vec3(X_RAND, Y_RAND, Z_RAND))) * FACTOR_RAND);
 }
-
-
 
 float noise(in vec3 p, in float scale) {
 	vec3 f;
@@ -56,7 +62,7 @@ float fBm(in vec3 p, in float scale){
 
 	float f = 0.0;
     p = mod(p, scale);
-	float amp = 0.6;
+	float amp = u_exposition;
 	
 	for (float i = 0.; i < 5.; i+=1.)
 	{
@@ -69,24 +75,35 @@ float fBm(in vec3 p, in float scale){
 }
 
 void main() {
-    vec2 uv = gl_FragCoord.xy/u_resolution;
-    
-	// vec3 color = vec3(fBm(vec3(uv, 0.) + u_offset, 10.));
-
+	vec2 coord = gl_FragCoord.xy/u_resolution;
+    vec3 uv = vec3(coord.x, coord.y, 0.);
 	vec3 color;
-	if( RGB == true ){
-		color = vec3(
-			fBm(vec3(uv, 0.) + u_offset, u_density),
-			fBm(vec3(uv, 0.) + u_offset + vec3(0.3), u_density),
-			fBm(vec3(uv, 0.) + u_offset + vec3(0.6), u_density)
+	float dentity = u_density;
+    
+	#ifdef SPHERICAL
+		uv = (uv - vec3(0.5))*2.;
+		uv = vec3(
+			cos(uv.y*M_PI/2.) * cos(uv.x*M_PI),
+			sin(uv.y*M_PI/2.),
+			cos(uv.y*M_PI/2.) * sin(uv.x*M_PI)
 		);
-	} else {
-    	color = vec3(
-			fBm(vec3(uv, 0.) + u_offset, u_density)
-		);
-	}
+	#endif
 
-	color = (normalize((color - vec3(0.5)) + vec3(0., 0., 0.5)) + 1.)/2.;	
+	#ifdef RGB
+		color = vec3(
+			fBm(uv + u_offset, dentity),
+			fBm(uv + u_offset + vec3(0.3), dentity),
+			fBm(uv + u_offset + vec3(0.6), dentity)
+		);
+	#else
+    	color = vec3(
+			fBm(uv + u_offset, dentity)
+		);
+	#endif
+
+	#ifdef NORMALIZE
+		color = (normalize((color - vec3(0.5)) + vec3(0., 0., u_normal_intensity)) + 1.)/2.;	
+	#endif
 
     gl_FragColor = vec4(vec3(color), 1.);
 }
